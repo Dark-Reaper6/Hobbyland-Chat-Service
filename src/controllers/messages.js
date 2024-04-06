@@ -1,89 +1,51 @@
 const Room = require('../models/Room');
 const Message = require('../models/message');
-const getFile = require('../../utils/getFile');
-const StandardApi = require("../middlewares/standard-api")
+const { isValidObjectId } = require("mongoose");
+const { io } = require("../socket");
+const { SendMessageSchema } = require("../validation-schemas")
+const StandardApi = require("../middlewares/standard-api");
 
 const GetChatMessages = async (req, res) => StandardApi(req, res, async () => {
   const { room_id } = req.body;
-  if (!room_id) return res.status(400).json({ success: false, msg: "room id is required." });
+  if (!isValidObjectId(room_id)) return res.status(400).json({ success: false, msg: "room id is required." });
 
-  const LIMIT = 25;
+  const LIMIT = +req.query.limit || 25;
   const msgQuery = { room_id, deleted: false }
   let totalMessages = await Message.countDocuments(msgQuery);
-  const totalPages = Math.ceil(totalMessages / LIMIT);
-  const page = parseInt(req.query.page) || 1;
+  const total_pages = Math.ceil(totalMessages / LIMIT);
+  const page = +req.query.page || 1;
   const skipMsgs = (page - 1) * LIMIT;
-  let messages = await Message.find()
+  let messages = await Message.find(msgQuery)
     .sort({ updatedAt: -1 })
     .skip(skipMsgs)
     .limit(LIMIT)
-    .populate('pictures author')
+    .populate('author')
     .lean()
 
-  for (let message of messages) {
-    for (let file of message.pictures) {
-      if (typeof file.file !== 'string') return
-      try {
-        file.file = await getFile({
-          shield: file.file,
-          userId: req.user.id,
-        })
-      } catch (e) { console.log("Error getting the file: " + e) }
-    }
-  }
-
-  res.status(200).json({ success: true, msg: '', messages, page, total_pages: totalPages });
+  res.status(200).json({ success: true, msg: '', messages, page, total_pages });
 })
 
-const SendMessage = async (req, res) => {
-  let room;
+const SendMessage = async (req, res) => StandardApi(req, res, async () => {
+  const { room_id, message, files } = req.body;
 
-  if (!req.fields.room) {
-    return res.status(400).json({ status: 'error', user: 'room id required', message: 'room id required' });
-  }
-
-  room = await Room.findById(req.fields.room);
-
-  let message;
-
-  message = new Message({
-    content: req.fields.content,
+  const newMessage = (await Message.create({
     author: req.user.id,
-    room: room._id,
-    members: room.members,
-    access: room.access,
-    files: req.fields.files,
-    pictures: req.fields.pictures,
-    type: 'message',
-  });
-  await message.save();
+    room_id,
+    content: message,
+    files
+  })).toObject();
 
-  room.lastUpdate = Date.now();
-  room.lastMessage = message;
-  await room.save();
+  const room = await Room.findByIdAndUpdate(room_id, {
+    last_message: newMessage._id,
+    last_author: req.user._id
+  }, { new: true, lean: true });
 
-  message = await Message.findById(message._id).populate('author').populate('pictures').lean();
+  room.members.forEach((member) => io.to(member.toString()).emit('message',
+    { message: { ...newMessage, author: req.user }, room }
+  ))
 
-  for (let j = 0; j < message.pictures.length; j++) {
-    const file = { ...message.pictures[j] }.file;
-    if (file && typeof file === 'string') {
-      try {
-        message.pictures[j].file = await getFile({
-          shield: file,
-          userId: req.user.id,
-        });
-      } catch (e) { }
-    }
-  }
-
-  const io = Socket.get();
-
-  for (let member of message.members) {
-    io.to(member.toString()).emit('message', { message, room });
-  }
-
-  res.status(200).json({ status: 'ok', message, room });
-};
+  res.status(201).json({ success: true, message, room });
+}, { validationSchema: SendMessageSchema })
 
 module.exports = {
   SendMessage,

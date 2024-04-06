@@ -9,6 +9,8 @@ const jwtExpiries = {
 
 const registerProviders = ["hobbyland", "google"];
 
+const messageTypes = ["message", "announcement", "tooltip"];
+
 const userDocsTypes = ['id_card', 'passport', "driver_license", 'other'];
 
 const docsVerificStatuses = ["pending", "verified", "unverified"];
@@ -16,6 +18,7 @@ const docsVerificStatuses = ["pending", "verified", "unverified"];
 module.exports = {
     adminRoles,
     jwtExpiries,
+    messageTypes,
     userDocsTypes,
     allowedOrigins,
     registerProviders,

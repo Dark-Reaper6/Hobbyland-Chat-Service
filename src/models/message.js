@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { messageTypes } = require("../../hobbyland.config");
 
 const MessageSchema = new mongoose.Schema({
   author: {
@@ -11,12 +12,20 @@ const MessageSchema = new mongoose.Schema({
     ref: 'Room',
     required: true
   },
-  file: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'File',
+  content: {
+    type: String,
+    required: true
   },
-  content: String,
-  type: String,
+  files: [{ type: String }],
+  type: {
+    type: String,
+    enum: messageTypes,
+    default: messageTypes[0]
+  },
+  deleted: {
+    type: Boolean,
+    default: false
+  }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Messages', MessageSchema);
+module.exports = mongoose.model('Message', MessageSchema);
