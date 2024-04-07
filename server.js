@@ -2,7 +2,6 @@ const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const formidable = require('express-formidable');
-const routes = require('./src/routes');
 const xss = require('xss').filterXSS;
 const { ConnectDB } = require('./lib/connect-db');
 const { initSocket } = require("./src/socket");
@@ -15,11 +14,12 @@ await initSocket(server);
 
 app.use(cors());
 app.use(formidable({ maxFileSize: Number.MAX_SAFE_INTEGER }));
-app.use((req, res, next) => {
-  Object.keys(req.fields).map(key => typeof req.fields[key] === 'string' && (req.fields[key] = xss(req.fields[key])));
+app.use((req, _, next) => {
+  Object.keys(req.body).map(key => typeof req.body[key] === 'string' && (req.body[key] = xss(req.body[key])));
   next();
 });
-app.use('/api', routes);
+app.use("/api/message", require("./src/routes/messages"));
+app.use("/api/room", require("./src/routes/room"));
 
 // initializing server
 server.listen(process.env.PORT, async () => {
