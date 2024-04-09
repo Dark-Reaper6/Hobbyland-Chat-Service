@@ -7,6 +7,15 @@ const jwtExpiries = {
     extended: 30 // 30 days
 }
 
+const userLevels = {
+    "0": 500,
+    "1": 1000,
+    "2": 3200,
+    "3": 6400,
+    "4": 18000,
+    "5": 30000
+}
+
 const registerProviders = ["hobbyland", "google"];
 
 const messageTypes = ["message", "announcement", "tooltip"];
@@ -17,6 +26,7 @@ const docsVerificStatuses = ["pending", "verified", "unverified"];
 
 module.exports = {
     adminRoles,
+    userLevels,
     jwtExpiries,
     messageTypes,
     userDocsTypes,
