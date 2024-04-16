@@ -4,6 +4,7 @@ const { isValidObjectId } = require("mongoose");
 const { io } = require("../socket");
 const { SendMessageSchema } = require("../validation-schemas")
 const StandardApi = require("../middlewares/standard-api");
+const UploadFiles = require("../../lib/upload-files");
 
 const GetChatMessages = async (req, res) => StandardApi(req, res, async () => {
   const { room_id } = req.body;
@@ -26,13 +27,14 @@ const GetChatMessages = async (req, res) => StandardApi(req, res, async () => {
 })
 
 const SendMessage = async (req, res) => StandardApi(req, res, async () => {
-  const { room_id, message, files } = req.body;
+  const { room_id, message } = req.body;
+  const { files } = req;
 
   const newMessage = (await Message.create({
     author: req.user.id,
     room_id,
     content: message,
-    files
+    // files
   })).toObject();
 
   const room = await Room.findByIdAndUpdate(room_id, {

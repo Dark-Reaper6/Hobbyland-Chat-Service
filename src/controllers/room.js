@@ -13,7 +13,7 @@ const CreateRoom = async (req, res) => StandardApi(req, res, async () => {
     }).populate('last_author last_message members').lean();
 
     if (!room) {
-        room = new Room({ members: [req.user.id, req.fields.user] });
+        room = (await Room.create({ members: [req.user.id, req.fields.user] })).toObject();
 
         const message = (await Message.create({
             room_id: room._id,
@@ -23,14 +23,20 @@ const CreateRoom = async (req, res) => StandardApi(req, res, async () => {
             type: 'tooltip',
         })).toObject();
 
-        room.last_message = message._id;
-        room = await room.save();
+        room = await Room.findByIdAndUpdate(room._id,
+            { last_message: message._id },
+            { lean: true, new: true }
+        ).populate('last_author last_message members')
     }
+    res.status(200).json({ success: true, msg: "Room created successfully", room });
+})
 
-    room = await Room.findById(room._id).populate('lastAuthor').populate('lastMessage').populate('members').lean();
-    res.status(200).json({ status: 'ok', room });
+const GetRooms = async (req, res) => StandardApi(req, res, async () => {
+    const rooms = await Room.find({ members: req.user._id }).populate('last_author last_message members').lean();
+    res.status(200).json({ success: true, msg: '', rooms })
 })
 
 module.exports = {
+    GetRooms,
     CreateRoom
 }
