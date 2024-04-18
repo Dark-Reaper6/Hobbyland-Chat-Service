@@ -29,12 +29,12 @@ const GetChatMessages = async (req, res) => StandardApi(req, res, async () => {
 const SendMessage = async (req, res) => StandardApi(req, res, async () => {
   const { room_id, message } = req.body;
   const { files } = req;
+  if (files && !files.chat_shares?.length) return res.status(400).json({ success: false, msg: "Invalid files key or format." });
 
   const newMessage = (await Message.create({
     author: req.user.id,
     room_id,
     content: message,
-    // files
   })).toObject();
 
   const room = await Room.findByIdAndUpdate(room_id, {
@@ -45,8 +45,12 @@ const SendMessage = async (req, res) => StandardApi(req, res, async () => {
   room.members.forEach((member) => io.to(member.toString()).emit('message',
     { message: { ...newMessage, author: req.user }, room }
   ))
-
   res.status(201).json({ success: true, message, room });
+
+  const filePairs = files.chat_shares.map((file, index) => ({ file, key: `/chat/${newMessage._id}-${index}` }))
+  const fileUrls = await UploadFiles(filePairs);
+  await Message.findByIdAndUpdate(newMessage._id, { files: fileUrls });
+
 }, { validationSchema: SendMessageSchema })
 
 module.exports = {
