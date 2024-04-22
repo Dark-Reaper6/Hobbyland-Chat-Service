@@ -20,8 +20,9 @@ const InitializeServer = async () => {
     Object.keys(req.body).map(key => typeof req.body[key] === 'string' && (req.body[key] = xss(req.body[key])));
     next();
   });
-  app.use("/api/message", require("./src/routes/messages"));
+  app.use("/api/message", require("./src/routes/message"));
   app.use("/api/room", require("./src/routes/room"));
+  app.use("/api/event", require("./src/routes/event"));
 
   // initializing server
   server.listen(process.env.PORT, async () => {
