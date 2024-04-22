@@ -4,7 +4,7 @@ const Message = require("../models/message");
 const StandardApi = require("../middlewares/standard-api");
 
 const CreateRoom = async (req, res) => StandardApi(req, res, async () => {
-    const { user_id } = req.body;
+    const { user_id } = req.query;
     if (!isValidObjectId(user_id)) return res.status(400).json({ success: false, msg: "The user_id Body Parameter is required with whom this user wants to create a chat room." });
 
     let room = await Room.findOne({
