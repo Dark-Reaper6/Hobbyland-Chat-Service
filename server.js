@@ -6,6 +6,7 @@ const formidable = require('express-formidable');
 const xss = require('xss').filterXSS;
 const { ConnectDB } = require('./lib/database');
 const { initSocket } = require("./src/socket");
+const { allowedOrigins } = require("./hobbyland.config");
 
 console.log('Starting the server...\n');
 
@@ -14,7 +15,7 @@ const InitializeServer = async () => {
   const server = http.createServer(app);
   await initSocket(server);
 
-  app.use(cors());
+  app.use(cors({ credentials: true, origin: allowedOrigins }));
   app.use(formidable({ maxFileSize: Number.MAX_SAFE_INTEGER }));
   app.use((req, _, next) => {
     Object.keys(req.body).map(key => typeof req.body[key] === 'string' && (req.body[key] = xss(req.body[key])));
