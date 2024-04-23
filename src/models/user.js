@@ -112,30 +112,17 @@ const UserSchema = new mongoose.Schema({
             type: Boolean,
             default: true
         },
-        socket_id: String,
+        id: String,
         last_active: Date
     },
-    is_verified: {
+    is_active: {
         type: Boolean,
-        default: false,
-        immutable: immutableCondition
+        default: true
     },
     last_checkin: {
         type: Date,
         default: new Date()
     }
 }, { timestamps: true });
-
-UserSchema.pre('save', async function (next) {
-    console.log("Here is the user doc in pre save event: ", this)
-    if (this.isModified('level.exp')) {
-        const { level } = this;
-
-        const previousExp = level.exp - this.getUpdate().$inc['level.exp'];
-        const nextLevelExp = userLevels[level.level + 1];
-        if (previousExp < nextLevelExp && level.exp >= nextLevelExp) level.level += 1;
-    }
-    next();
-});
 
 module.exports = mongoose.model("User", UserSchema);

@@ -11,7 +11,8 @@ const initSocket = async (server) => {
     });
 
     io.use((socket, next) => {
-        const authError = () => next(new Error('Authentication error'));
+        console.log("A candidate just appeared with id: " + socket.id)
+        const authError = () => { console.log("Socket handshake authentication error"); next(new Error('Authentication error')); }
         if (!socket?.handshake?.query?.token) return authError();
         jwt.verify(socket.handshake.query.token, process.env.AUTH_SECRET, (err, decoded) => {
             if (err) return authError();
@@ -32,14 +33,16 @@ const initSocket = async (server) => {
         })
         socket.join(user.id);
         io.emit('online', { id: user.id });
+        console.log("A user with id: " + user.id + " connected!")
 
         socket.on('disconnect', async () => {
-            const updatedUser = await User.findByIdAndUpdate(user.id, {
+            await User.findByIdAndUpdate(user.id, {
                 socket: {
                     active: false,
-                    last_active: getDateOfTimezone(updatedUser.timezone)
+                    last_active: getDateOfTimezone(user.timezone)
                 }
             }, { new: true, lean: true });
+            console.log("A user with id: " + user.id + " disconnected!")
             io.emit('offline', { id: user.id });
         });
     });
