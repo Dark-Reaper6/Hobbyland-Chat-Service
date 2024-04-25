@@ -3,6 +3,8 @@ const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const formidable = require('express-formidable');
+const cookieParser = require('cookie-parser');
+const morgan = require('morgan');
 const xss = require('xss').filterXSS;
 const { ConnectDB } = require('./lib/database');
 const { initSocket } = require("./src/socket");
@@ -17,10 +19,12 @@ const InitializeServer = async () => {
 
   app.use(cors({ credentials: true, origin: allowedOrigins }));
   app.use(formidable({ maxFileSize: Number.MAX_SAFE_INTEGER }));
-  app.use((req, _, next) => {
-    Object.keys(req.body).map(key => typeof req.body[key] === 'string' && (req.body[key] = xss(req.body[key])));
-    next();
-  });
+  app.use(cookieParser());
+  app.use(morgan('dev'));
+  // app.use((req, _, next) => {
+  //   Object.keys(req.body).map(key => typeof req.body[key] === 'string' && (req.body[key] = xss(req.body[key])));
+  //   next();
+  // });
   app.use("/api/message", require("./src/routes/message"));
   app.use("/api/room", require("./src/routes/room"));
   app.use("/api/event", require("./src/routes/event"));

@@ -113,6 +113,9 @@ const UserSchema = new mongoose.Schema({
             default: true
         },
         id: String,
+        // ids: [
+        //     { user_agent: String }
+        // ],
         last_active: Date
     },
     is_active: {

@@ -1,4 +1,4 @@
-const User = require("../models/user");
+const Admin = require("../models/admin");
 const { isValidObjectId } = require("mongoose");
 const { sendAdminNotification } = require("../../lib/send-notification");
 const { verify, decode } = require("jsonwebtoken");
@@ -15,7 +15,7 @@ module.exports = async function StandardApi(req, res, next, { verify_user = true
             if (!isValidObjectId(decodedToken._id)) throw new Error("invalid session token");
             // if (decode(decodedToken.user_agent) !== req.headers['user-agent']) throw new Error("invalid session token"); // Currently disabled due to testing in different divices.S
             if (verify_admin) {
-                let admin = await Admin.findById(admin_id);
+                let admin = await Admin.findById(decodedToken._id);
                 if (!admin || !adminRoles.includes(admin.role)) throw new Error("invalid session token");
             }
             req.user = decodedToken;

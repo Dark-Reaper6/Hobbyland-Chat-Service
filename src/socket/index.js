@@ -14,7 +14,7 @@ const initSocket = async (server) => {
         console.log("A candidate just appeared with id: " + socket.id)
         const authError = () => { console.log("Socket handshake authentication error"); next(new Error('Authentication error')); }
         if (!socket?.handshake?.query?.token) return authError();
-        jwt.verify(socket.handshake.query.token, process.env.AUTH_SECRET, (err, decoded) => {
+        jwt.verify(socket.handshake.query.token, process.env.APP_SECRET_KEY, (err, decoded) => {
             if (err) return authError();
             socket.user = decoded;
             next();
