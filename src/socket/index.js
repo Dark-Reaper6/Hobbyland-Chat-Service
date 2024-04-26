@@ -50,4 +50,6 @@ const initSocket = async (server) => {
     console.log('socket system online');
 };
 
-module.exports = { initSocket, io };
+const Io = () => io;
+
+module.exports = { initSocket, Io };

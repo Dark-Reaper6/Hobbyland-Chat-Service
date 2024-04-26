@@ -5,10 +5,10 @@ const cors = require('cors');
 const formidable = require('express-formidable');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
-const xss = require('xss').filterXSS;
 const { ConnectDB } = require('./lib/database');
 const { initSocket } = require("./src/socket");
 const { allowedOrigins } = require("./hobbyland.config");
+// const xss = require('xss').filterXSS;
 
 console.log('Starting the server...\n');
 
@@ -28,6 +28,7 @@ const InitializeServer = async () => {
   app.use("/api/message", require("./src/routes/message"));
   app.use("/api/room", require("./src/routes/room"));
   app.use("/api/event", require("./src/routes/event"));
+  app.use("/api/test", require("./src/controllers/test"))
 
   // initializing server
   server.listen(process.env.PORT, async () => {

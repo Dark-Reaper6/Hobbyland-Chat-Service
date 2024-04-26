@@ -1,7 +1,7 @@
 const Room = require("../models/room");
 const Message = require('../models/message');
 const { isValidObjectId } = require("mongoose");
-const { io } = require("../socket");
+const { Io } = require("../socket");
 const { SendMessageSchema } = require("../validation-schemas")
 const StandardApi = require("../middlewares/standard-api");
 const UploadFiles = require("../../lib/upload-files");
@@ -42,7 +42,7 @@ const SendMessage = async (req, res) => StandardApi(req, res, async () => {
     last_author: req.user._id
   }, { new: true, lean: true });
 
-  room.members.forEach((member) => io.to(member.toString()).emit('message',
+  room.members.forEach((member) => Io().to(member.toString()).emit('message',
     { message: { ...newMessage, author: req.user }, room }
   ))
   res.status(201).json({ success: true, message, room });

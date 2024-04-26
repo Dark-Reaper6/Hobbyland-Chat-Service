@@ -1,7 +1,7 @@
 const { isValidObjectId } = require("mongoose");
 const Room = require("../models/room");
 const Message = require("../models/message");
-const { io } = require("../socket/index");
+const { Io } = require("../socket/index");
 const StandardApi = require("../middlewares/standard-api");
 
 const CreateRoom = async (req, res) => StandardApi(req, res, async () => {
@@ -29,7 +29,7 @@ const CreateRoom = async (req, res) => StandardApi(req, res, async () => {
             { lean: true, new: true }
         ).populate('last_author last_message members')
     }
-    room.members.forEach(member => io.to(member.toString()).emit("new-room", { room }));
+    room.members.forEach(member => Io().to(member.toString()).emit("new-room", { room }));
 
     res.status(200).json({ success: true, msg: "Room created successfully", room });
 })
