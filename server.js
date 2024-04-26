@@ -18,8 +18,9 @@ const InitializeServer = async () => {
   await initSocket(server);
 
   app.use(cors({ credentials: true, origin: allowedOrigins }));
-  app.use(formidable({ maxFileSize: Number.MAX_SAFE_INTEGER }));
+  // app.use(formidable({ maxFileSize: Number.MAX_SAFE_INTEGER }));
   app.use(cookieParser());
+  app.use(express.json());
   app.use(morgan('dev'));
   // app.use((req, _, next) => {
   //   Object.keys(req.body).map(key => typeof req.body[key] === 'string' && (req.body[key] = xss(req.body[key])));

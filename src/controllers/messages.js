@@ -7,8 +7,8 @@ const StandardApi = require("../middlewares/standard-api");
 const UploadFiles = require("../../lib/upload-files");
 
 const GetChatMessages = async (req, res) => StandardApi(req, res, async () => {
-  const { room_id } = req.body;
-  if (!isValidObjectId(room_id)) return res.status(400).json({ success: false, msg: "room id is required." });
+  const { room_id } = req.query;
+  if (!isValidObjectId(room_id)) return res.status(400).json({ success: false, msg: "A valid room id is required." });
 
   const LIMIT = +req.query.limit || 25;
   const msgQuery = { room_id, deleted: false }
@@ -32,7 +32,7 @@ const SendMessage = async (req, res) => StandardApi(req, res, async () => {
   if (files && !files.chat_shares?.length) return res.status(400).json({ success: false, msg: "Invalid files key or format." });
 
   const newMessage = (await Message.create({
-    author: req.user.id,
+    author: req.user._id,
     room_id,
     content: message,
   })).toObject();
@@ -47,9 +47,9 @@ const SendMessage = async (req, res) => StandardApi(req, res, async () => {
   ))
   res.status(201).json({ success: true, message, room });
 
-  const filePairs = files.chat_shares.map((file, index) => ({ file, key: `/chat/${newMessage._id}-${index}` }))
-  const fileUrls = await UploadFiles(filePairs);
-  await Message.findByIdAndUpdate(newMessage._id, { files: fileUrls });
+  // const filePairs = files.chat_shares.map((file, index) => ({ file, key: `/chat/${newMessage._id}-${index}` }))
+  // const fileUrls = await UploadFiles(filePairs);
+  // await Message.findByIdAndUpdate(newMessage._id, { files: fileUrls });
 
 }, { validationSchema: SendMessageSchema })
 
