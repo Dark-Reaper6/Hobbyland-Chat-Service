@@ -35,11 +35,19 @@ const CreateRoom = async (req, res) => StandardApi(req, res, async () => {
 })
 
 const GetRooms = async (req, res) => StandardApi(req, res, async () => {
-    const rooms = await Room.find({ members: req.user._id }).populate('last_author last_message members').lean();
+    const rooms = await Room.find({ members: req.user._id }).populate('last_author last_message members').sort({ _id: -1 }).lean();
     res.status(200).json({ success: true, msg: '', rooms })
 })
 
+const GetRoom = async (req, res) => StandardApi(req, res, async () => {
+    const { room_id } = req.query;
+    if (!isValidObjectId(room_id)) return res.status(400).json({ success: false, msg: "The room_id Query Parameter is required." });
+    const room = await Room.findById(room_id).populate('last_author last_message members').lean();
+    res.status(200).json({ success: true, msg: '', room })
+})
+
 module.exports = {
+    GetRoom,
     GetRooms,
     CreateRoom
 }
