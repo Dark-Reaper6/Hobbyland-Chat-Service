@@ -1,8 +1,9 @@
-const { isValidObjectId } = require("mongoose");
+const mongoose = require("mongoose");
 const Room = require("../models/room");
 const Message = require("../models/message");
 const { Io } = require("../socket/index");
 const StandardApi = require("../middlewares/standard-api");
+const { isValidObjectId } = mongoose;
 
 const CreateRoom = async (req, res) => StandardApi(req, res, async () => {
     const { user_id } = req.query;
@@ -10,7 +11,7 @@ const CreateRoom = async (req, res) => StandardApi(req, res, async () => {
 
     let room = await Room.findOne({
         members: { $all: [req.user._id, user_id] },
-        isGroup: false
+        is_group: false
     }).populate('last_author last_message members').lean();
 
     if (!room) {
@@ -28,7 +29,7 @@ const CreateRoom = async (req, res) => StandardApi(req, res, async () => {
             { last_message: message._id },
             { lean: true, new: true }
         ).populate('last_author last_message members')
-    }
+    } else return res.status(200).json({ success: true, msg: "This room already exists.", room });
     room.members.forEach(member => Io().to(member.toString()).emit("new-room", { room }));
 
     res.status(200).json({ success: true, msg: "Room created successfully", room });

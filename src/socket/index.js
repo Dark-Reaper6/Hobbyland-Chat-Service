@@ -1,6 +1,7 @@
 const SocketIO = require('socket.io');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const { ConnectDB } = require('../../lib/database')
 const { getDateOfTimezone } = require("../../lib/cyphers");
 const allowedOrigins = require("../../hobbyland.config")
 
@@ -10,7 +11,8 @@ const initSocket = async (server) => {
         cors: { origin: allowedOrigins }
     });
 
-    io.use((socket, next) => {
+    io.use(async (socket, next) => {
+        await ConnectDB();
         console.log("A candidate just appeared with id: " + socket.id)
         const authError = () => { console.log("Socket handshake authentication error"); next(new Error('Authentication error')); }
         if (!socket?.handshake?.query?.token) return authError();

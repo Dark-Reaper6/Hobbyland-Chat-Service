@@ -1,6 +1,9 @@
 const allowedOrigins = ["http://localhost:3001", "http://localhost:3000"];
 
-const adminRoles = ["administrator", "maintainer", "support"]
+const adminRoles = ["administrator", "maintainer", "support"];
+
+const hobbylandServers = ["hobbyland-root-server", "hobbyland-chat-server"];
+const serverActionTypes = ["dispatch_event"];
 
 const jwtExpiries = {
     default: 7, // 7 days
@@ -31,6 +34,8 @@ module.exports = {
     messageTypes,
     userDocsTypes,
     allowedOrigins,
+    hobbylandServers,
+    serverActionTypes,
     registerProviders,
-    docsVerificStatuses
+    docsVerificStatuses,
 }

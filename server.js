@@ -18,6 +18,7 @@ const InitializeServer = async () => {
   await initSocket(server);
 
   app.use(cors({ credentials: true, origin: allowedOrigins }));
+  app.use(async (i, _, next) => { await ConnectDB(); next(); });
   app.use(formidable({ maxFileSize: Number.MAX_SAFE_INTEGER }));
   app.use(cookieParser());
   app.use(express.json());
