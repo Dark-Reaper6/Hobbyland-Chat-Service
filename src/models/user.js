@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { hashValue } = require('../../lib/cyphers');
 const { immutableCondition } = require('../../lib/database');
 const { userLevels } = require("../../hobbyland.config")
 
@@ -38,6 +39,7 @@ const UserSchema = new mongoose.Schema({
         type: String,
         minLength: [8, "Password should be greater than 8 characters"],
         select: false,
+        set: hashValue,
         immutable: immutableCondition
     },
     firstname: {
@@ -108,23 +110,26 @@ const UserSchema = new mongoose.Schema({
         }
     ],
     socket: {
-        active: {
-            type: Boolean,
-            default: true
+        type: {
+            sessions: [
+                {
+                    session_id: { type: String, required: true },
+                    user_agent: { type: String, required: true },
+                    active: { type: Boolean, default: true },
+                    last_seen: Date,
+                    login: {
+                        type: Boolean,
+                        default: true
+                    }
+                }
+            ],
+            active: {
+                type: Boolean,
+                default: true
+            },
+            last_active: Date
         },
-        id: String,
-        // ids: [
-        //     { user_agent: String }
-        // ],
-        last_active: Date
-    },
-    is_active: {
-        type: Boolean,
-        default: true
-    },
-    last_checkin: {
-        type: Date,
-        default: new Date()
+        immutable: immutableCondition
     }
 }, { timestamps: true });
 

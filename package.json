@@ -1,5 +1,5 @@
 {
-  "name": "hobbyland-webrtc-server",
+  "name": "hobbyland-chat-server",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@pusher/push-notifications-server": "^1.2.6",
     "argon2": "^0.30.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -23,6 +24,7 @@
     "morgan": "^1.10.0",
     "nodemon": "^3.1.0",
     "socket.io": "^4.4.1",
+    "uuidv4": "^6.2.13",
     "xss": "^1.0.10",
     "yup": "^1.4.0"
   }
