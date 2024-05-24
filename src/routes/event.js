@@ -1,8 +1,8 @@
 const express = require('express');
-const { DispatchEvent, DispatchLogout } = require("../controllers/event")
+const { DispatchNotification, DispatchLogout } = require("../controllers/event")
 const router = express.Router();
 
-router.post('/dispatch', DispatchEvent);
+router.post('/dispatch-notification', DispatchNotification);
 router.post('/dispatch-logout', DispatchLogout);
 
 module.exports = router;

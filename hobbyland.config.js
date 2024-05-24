@@ -20,6 +20,7 @@ const userLevels = {
 }
 
 const registerProviders = ["hobbyland", "google"];
+const userNotificationTypes = ["account", "primary"];
 
 const messageTypes = ["message", "announcement", "tooltip"];
 
@@ -35,7 +36,8 @@ module.exports = {
     userDocsTypes,
     allowedOrigins,
     hobbylandServers,
-    serverActionTypes,
     registerProviders,
+    serverActionTypes,
     docsVerificStatuses,
+    userNotificationTypes
 }
