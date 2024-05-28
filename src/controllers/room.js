@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Room = require("../models/room");
 const Message = require("../models/message");
 const { Io } = require("../socket/index");
+const { sendUserNotification } = require("../../lib/send-notification");
 const StandardApi = require("../middlewares/standard-api");
 const { isValidObjectId } = mongoose;
 
@@ -33,6 +34,14 @@ const CreateRoom = async (req, res) => StandardApi(req, res, async () => {
     room.members.forEach(member => Io().to(member.toString()).emit("new-room", { room }));
 
     res.status(200).json({ success: true, msg: "Room created successfully", room });
+
+    await sendUserNotification(user_id.toString(), {
+        category: "primary",
+        heading: "New Chat",
+        mini_msg: `${req.user?.firstname || ("@" + req.user.username)} started a new chat with you.`,
+        message: `${req.user?.firstname || ("@" + req.user.username)} started a new chat with you.`,
+        href: "/message"
+    }, { notify: true });
 })
 
 const GetRooms = async (req, res) => StandardApi(req, res, async () => {

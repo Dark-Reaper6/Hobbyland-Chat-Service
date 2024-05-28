@@ -2,8 +2,9 @@ const Room = require("../models/room");
 const Message = require('../models/message');
 const { isValidObjectId } = require("mongoose");
 const { Io } = require("../socket");
-const { SendMessageSchema } = require("../validation-schemas")
+const { SendMessageSchema } = require("../validation-schemas");
 const StandardApi = require("../middlewares/standard-api");
+const { sendUserNotification } = require("../../lib/send-notification");
 const UploadFiles = require("../../lib/upload-files");
 
 const GetChatMessages = async (req, res) => StandardApi(req, res, async () => {
@@ -40,12 +41,22 @@ const SendMessage = async (req, res) => StandardApi(req, res, async () => {
   const room = await Room.findByIdAndUpdate(room_id, {
     last_message: newMessage._id,
     last_author: req.user._id
-  }, { new: true, lean: true });
+  }, { new: true, lean: true }).populate("members");
 
-  room.members.forEach((member) => Io().to(member.toString()).emit('message',
+  room.members.forEach((member) => Io().to(member._id.toString()).emit('message',
     { message: { ...newMessage, author: req.user }, room }
   ))
   res.status(201).json({ success: true, message, room });
+
+  for (let memeber of room.members) {
+    await sendUserNotification(memeber._id.toString(), {
+      category: "primary",
+      heading: `New message from ${req.user?.firstname || ("@" + req.user.username)}`,
+      mini_msg: newMessage.content.slice(0, 50) + newMessage.content.length > 50 ? "..." : '',
+      message: `${req.user?.firstname || ("@" + req.user.username)} says: ${newMessage.content.slice(500)}`,
+      href: "/message"
+    }, { notify: true });
+  }
 
   // const filePairs = files.chat_shares.map((file, index) => ({ file, key: `/chat/${newMessage._id}-${index}` }))
   // const fileUrls = await UploadFiles(filePairs);
