@@ -2,7 +2,7 @@ const SocketIO = require('socket.io');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { ConnectDB } = require('../../lib/database');
-const allowedOrigins = require("../../hobbyland.config");
+const { allowedOrigins } = require("../../hobbyland.config");
 const { validate } = require('uuid');
 const { getDateOfTimezone } = require('../../lib/cyphers');
 
